@@ -26,8 +26,8 @@ export const submitAnswer = async (
 };
 
 export const getQuizSummary = async (quizSetId: string): Promise<QuizSummary> => {
-    const response = await quizSets.getQuizSetSummary(quizSetId);
-    return response.data;
+  const response = await quizSets.getQuizSetSummary(quizSetId);
+  return response.data;
 };
 
 export const resetAnswerRecord = async (quizSetId: string): Promise<{ wasReset: boolean }> => {

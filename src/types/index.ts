@@ -90,8 +90,14 @@ export interface UserAnswerRecord {
 
 // 答题总结相关类型
 export interface QuizSummary {
-  answers: string[];
-  similarPathsCount: number;
+  quizTitle: string;
+  answers: QuizAnswer[];
+  totalSimilarPaths: number;
+}
+
+export interface QuizAnswer {
+  questionNumber: number;
+  userAnswer: string;
 }
 
 // API 响应类型
@@ -104,4 +110,3 @@ export interface ApiResponse<T> {
 export interface ErrorResponse {
   message: string;
 }
- 

@@ -6,6 +6,7 @@ import QuizSetList from './pages/quizSetList'
 import QuizQuestion from './pages/quizQuestion'
 import AuthCallback from './pages/authCallback'
 import ProtectedRoute from './components/common/protectedRoute'
+import QuizSummary from './pages/quizSummary'
 
 function App() {
   return (
@@ -24,6 +25,11 @@ function App() {
             <Route path="/quiz-question/:quizSetId" element={
               <ProtectedRoute>
                 <QuizQuestion />
+              </ProtectedRoute>
+            } />
+            <Route path="/quiz-summary/:quizSetId" element={
+              <ProtectedRoute>
+                <QuizSummary />
               </ProtectedRoute>
             } />
           </Routes>
