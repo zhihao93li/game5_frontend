@@ -1,65 +1,59 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import QuizQuestion from '../components/quiz/quizQuestion';
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-
-// 模拟的问题数据
-const mockQuestion = {
-  id: '1',
-  content: 'What is the capital of France?',
-  options: [
-    { optionNumber: 'A', content: 'London' },
-    { optionNumber: 'B', content: 'Paris' },
-  ],
-  quizSetId: '1',
-  orderInSet: 1,
-};
+import { getQuestionInfo, getQuestionByOrder, submitAnswer } from '../services/quiz';
+import { Question, SubmitAnswerResponse, GetQuestionInfoResponse } from '../types';
 
 const QuizQuestionPage: React.FC = () => {
-  const [question, setQuestion] = useState<typeof mockQuestion | null>(null);
-  const [questionNumber, setQuestionNumber] = useState(1);
-  const [totalQuestions, setTotalQuestions] = useState(10);
-  const [similarPathsCount, setSimilarPathsCount] = useState(0);
+  const { quizSetId } = useParams<{ quizSetId: string }>();
+  const navigate = useNavigate();
+  const [question, setQuestion] = useState<Question | null>(null);
+  const [questionInfo, setQuestionInfo] = useState<GetQuestionInfoResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchQuestion = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        // 模拟 API 调用
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setQuestion(mockQuestion);
-        // 模拟获取相似路径数量
-        setSimilarPathsCount(Math.floor(Math.random() * 100));
-      } catch (err) {
-        setError('Failed to fetch question. Please try again.');
-      } finally {
-        setIsLoading(false);
+    fetchQuestionInfo();
+  }, [quizSetId]);
+
+  const fetchQuestionInfo = async () => {
+    if (!quizSetId) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const info = await getQuestionInfo(quizSetId);
+      setQuestionInfo(info);
+      if (info.nextQuestionOrder) {
+        const nextQuestion = await getQuestionByOrder(quizSetId, info.nextQuestionOrder);
+        setQuestion(nextQuestion);
       }
-    };
+    } catch (err) {
+      setError('Failed to fetch question information. Please try again.');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    fetchQuestion();
-  }, [questionNumber]);
-
-  const handleSubmit = (selectedOption: string) => {
-    console.log(`Submitted answer: ${selectedOption}`);
-    // 这里应该有提交答案到后端的逻辑
-    // 然后获取下一个问题或结束测验
-    if (questionNumber < totalQuestions) {
-      setQuestionNumber(prev => prev + 1);
-    } else {
-      // 测验结束，跳转到总结页面
-      console.log('Quiz completed');
+  const handleSubmit = async (selectedOption: string) => {
+    if (!quizSetId || !question || !questionInfo) return;
+    try {
+      const response: SubmitAnswerResponse = await submitAnswer(quizSetId, selectedOption, question.orderInSet);
+      if (response.completed) {
+        navigate(`/quiz-summary/${quizSetId}`);
+      } else {
+        fetchQuestionInfo();
+      }
+    } catch (err) {
+      setError('Failed to submit answer. Please try again.');
+      console.error(err);
     }
   };
 
   const handleReturnToQuizSets = () => {
-    // 这里应该实现返回题库选择页面的逻辑
-    console.log('Returning to quiz set selection');
-    // 例如，如果使用 React Router，可以这样写：
-    // history.push('/quiz-sets');
+    navigate('/quiz-sets');
   };
 
   if (isLoading) {
@@ -86,7 +80,7 @@ const QuizQuestionPage: React.FC = () => {
     );
   }
 
-  if (!question) {
+  if (!question || !questionInfo) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card className="w-full max-w-2xl mx-auto">
@@ -107,12 +101,12 @@ const QuizQuestionPage: React.FC = () => {
         </Button>
       </div>
       <QuizQuestion
-        questionNumber={questionNumber}
-        totalQuestions={totalQuestions}
+        questionNumber={questionInfo.nextQuestionOrder}
+        totalQuestions={questionInfo.totalQuestions}
         content={question.content}
         options={question.options}
         onSubmit={handleSubmit}
-        similarPathsCount={similarPathsCount}
+        similarPathsCount={questionInfo.similarPathsCount}
       />
     </div>
   );

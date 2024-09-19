@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -25,11 +25,15 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
   onSubmit,
   similarPathsCount
 }) => {
-  const [selectedOption, setSelectedOption] = React.useState<string | null>(null);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    if (selectedOption) {
-      onSubmit(selectedOption);
+  const handleSubmit = async () => {
+    if (selectedOption && !isSubmitting) {
+      setIsSubmitting(true);
+      await onSubmit(selectedOption);
+      setSelectedOption(null);
+      setIsSubmitting(false);
     }
   };
 
@@ -62,6 +66,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
               variant={selectedOption === option.optionNumber ? "default" : "outline"}
               className="w-full justify-start text-left h-auto py-3 px-4"
               onClick={() => setSelectedOption(option.optionNumber)}
+              disabled={isSubmitting}
             >
               {option.content}
             </Button>
@@ -69,8 +74,8 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
         </div>
       </CardContent>
       <CardFooter className="flex flex-col items-stretch space-y-4">
-        <Button onClick={handleSubmit} disabled={!selectedOption} className="w-full">
-          Submit Answer
+        <Button onClick={handleSubmit} disabled={!selectedOption || isSubmitting} className="w-full">
+          {isSubmitting ? 'Submitting...' : 'Submit Answer'}
         </Button>
         <Progress value={(questionNumber / totalQuestions) * 100} className="w-full" />
         <p className="text-sm text-muted-foreground text-center">

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AuthResponse, RegisterRequest, LoginRequest, RegisterResponse } from '../types';
+import { AuthResponse, RegisterRequest, LoginRequest, RegisterResponse, QuizSet, QuizSummary, Question, SubmitAnswerResponse, GetQuestionInfoResponse } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
@@ -55,20 +55,26 @@ export const auth = {
 
 // 题库相关接口
 export const quizSets = {
-  getAll: () => api.get('/quiz-sets'),
-  getOne: (quizSetId: string) => api.get(`/quiz-sets/${quizSetId}`),
+  getQuizSets: () => 
+    api.get<QuizSet[]>('/quiz-sets'),
+  getQuizSetById: (quizSetId: string) => 
+    api.get<QuizSet>(`/quiz-sets/${quizSetId}`),
   resetAnswerRecord: (quizSetId: string) =>
-    api.post(`/quiz-sets/reset-answer-record/${quizSetId}`),
-  getSummary: (quizSetId: string) => api.get(`/quiz-sets/summary/${quizSetId}`),
+    api.post<{ wasReset: boolean }>(`/quiz-sets/reset-answer-record/${quizSetId}`),
+  getQuizSetSummary: (quizSetId: string) => 
+    api.get<QuizSummary>(`/quiz-sets/summary/${quizSetId}`),
 };
 
 // 问题相关接口
 export const questions = {
-  getNext: (quizSetId: string) => api.get(`/questions/next/${quizSetId}`),
-  getSpecific: (quizSetId: string, orderInSet: number) =>
-    api.get(`/questions/${quizSetId}/${orderInSet}`),
+  getNextQuestion: (quizSetId: string) => 
+    api.get<Question>(`/questions/next/${quizSetId}`),
+  getQuestionByOrder: (quizSetId: string, orderInSet: number) =>
+    api.get<Question>(`/questions/${quizSetId}/${orderInSet}`),
   submitAnswer: (quizSetId: string, optionNumber: string, orderInSet: number) =>
-    api.post(`/questions/submit/${quizSetId}`, { optionNumber, orderInSet }),
+    api.post<SubmitAnswerResponse>(`/questions/submit/${quizSetId}`, { optionNumber, orderInSet }),
+  getQuestionInfo: (quizSetId: string) =>
+    api.get<GetQuestionInfoResponse>(`/questions/info/${quizSetId}`),
 };
 
 export default api;

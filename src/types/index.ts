@@ -69,6 +69,15 @@ export interface SubmitAnswerResponse {
   similarPathsCount: number;
 }
 
+export interface GetQuestionInfoResponse {
+  currentProgress: number;
+  totalQuestions: number;
+  nextQuestionOrder: number;
+  nextQuestionContent: string | null;
+  similarPathsCount: number;
+  completed: boolean;
+}
+
 // 用户答题记录相关类型
 export interface UserAnswerRecord {
   recordId: string;
@@ -95,3 +104,4 @@ export interface ApiResponse<T> {
 export interface ErrorResponse {
   message: string;
 }
+ 

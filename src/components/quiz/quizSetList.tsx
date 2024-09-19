@@ -37,9 +37,9 @@ const QuizSetList: React.FC<QuizSetListProps> = ({ quizSets, onStartQuiz, onCont
             <CardDescription>{quizSet.description}</CardDescription>
           </CardHeader>
           <CardContent className="flex-grow">
-            <Progress value={quizSet.progress} className="w-full" />
+            <Progress value={Math.round((quizSet.progress / quizSet.totalQuestions) * 100)} className="w-full" />
             <p className="mt-2 text-sm text-gray-600">
-              Progress: {quizSet.progress}% ({Math.round(quizSet.progress * quizSet.totalQuestions / 100)}/{quizSet.totalQuestions} questions)
+              Progress: ({quizSet.progress}/{quizSet.totalQuestions} questions)
             </p>
           </CardContent>
           <CardFooter>
